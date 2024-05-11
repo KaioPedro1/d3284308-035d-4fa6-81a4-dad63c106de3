@@ -2,7 +2,6 @@ use std::{collections::HashMap, io::ErrorKind, sync::Mutex};
 
 use super::Account;
 
-
 pub struct AccountManager {
     accounts: Mutex<HashMap<String, u64>>,
 }
@@ -38,23 +37,28 @@ impl AccountManager {
             Err(ErrorKind::NotFound)
         }
     }
-    pub fn transfer(&self, origin_key: String, destination_key: String, value:u64)-> Result<(Account, Account), ErrorKind>{
+    pub fn transfer(
+        &self,
+        origin_key: String,
+        destination_key: String,
+        value: u64,
+    ) -> Result<(Account, Account), ErrorKind> {
         let mut accounts = self.accounts.lock().unwrap();
-        let origin_balance = accounts.get(&origin_key).cloned();
-        let  destination_balance  = accounts.get(&destination_key).cloned();
-        match (origin_balance, destination_balance) {
-            (Some(mut og_balance), Some(mut dest_balance)) => {
-                if og_balance>=value{
-                    og_balance-=value;
-                    dest_balance+=value;
-                    accounts.insert(origin_key.clone(), og_balance);
-                    accounts.insert(destination_key.clone(), dest_balance);
-                    return Ok((Account::new(origin_key, og_balance), Account::new(destination_key, dest_balance)))
-                }else {
-                    return Err(ErrorKind::NotFound)
-                }
-            },
-            _=> return Err(ErrorKind::NotFound)
+        let mut origin_balance = accounts.get(&origin_key).cloned().unwrap_or(0);
+        let mut destination_balance = accounts.get(&destination_key).cloned().unwrap_or(0);
+        if origin_balance < value {
+            return Err(ErrorKind::NotFound);
         }
+        origin_balance -= value;
+        destination_balance += value;
+
+        accounts.insert(origin_key.clone(), origin_balance);
+        accounts.insert(destination_key.clone(), destination_balance);
+
+        Ok((
+            Account::new(origin_key.clone(), origin_balance),
+            Account::new(destination_key, destination_balance),
+        ))
     }
 }
+
