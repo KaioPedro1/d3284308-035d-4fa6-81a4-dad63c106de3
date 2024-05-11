@@ -60,5 +60,14 @@ impl AccountManager {
             Account::new(destination_key, destination_balance),
         ))
     }
+
+    pub fn get_balance(&self, key: String)-> Result<u64, ErrorKind>{
+        let accounts = self.accounts.lock().unwrap();
+        if let Some(balance) = accounts.get(&key){
+            return Ok(*balance)
+        }else{
+            return Err(ErrorKind::NotFound) 
+        }
+    }
 }
 

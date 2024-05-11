@@ -2,7 +2,7 @@ use actix_web::{middleware::Logger, web, App, HttpServer};
 mod controllers;
 mod models;
 mod services;
-use controllers::{reset, transaction_request};
+use controllers::{balance_get_request, reset, transaction_request};
 use models::AccountManager;
 
 
@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .app_data(account_manager.clone())
             .service(transaction_request)
+            .service(balance_get_request)
             .service(reset)
     })
     .bind(("127.0.0.1", 8080))?

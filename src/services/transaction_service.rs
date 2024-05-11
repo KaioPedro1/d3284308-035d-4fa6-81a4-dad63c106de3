@@ -6,7 +6,7 @@ use crate::models::{
     Account, AccountManager, TransactionRequest, TransactionResponse, TransactionType,
 };
 
-pub fn process_request(
+pub fn process_transaction_request(
     req_body: TransactionRequest,
     acc_manager: Data<AccountManager>,
 ) -> Result<TransactionResponse, ErrorKind> {
